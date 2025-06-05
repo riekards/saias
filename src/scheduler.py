@@ -2,7 +2,7 @@
 
 import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
-from trainer import Trainer
+from .trainer import Trainer
 
 
 def periodic_fine_tune(config_path: str = "configs/default.yaml"):

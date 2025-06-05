@@ -2,7 +2,7 @@
 
 import yaml
 import requests
-from memory import Memory
+from .memory import Memory
 
 class Agent:
     """

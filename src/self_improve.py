@@ -3,7 +3,7 @@ import threading
 import yaml
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from trainer import Trainer
+from .trainer import Trainer
 
 class MemoryHandler(FileSystemEventHandler):
     """
