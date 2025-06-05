@@ -2,9 +2,9 @@
 
 import argparse
 import threading
-from agent import Agent
-from trainer import Trainer
-from self_improve import start_self_improvement
+from .agent import Agent
+from .trainer import Trainer
+from .self_improve import start_self_improvement
 
 def main():
     parser = argparse.ArgumentParser(description="Local AI Assistant CLI")
@@ -28,7 +28,7 @@ def main():
         watcher_thread.start()
 
         # Launch periodic scheduler in the main thread
-        from scheduler import periodic_fine_tune
+        from .scheduler import periodic_fine_tune
         periodic_fine_tune()
         return
 

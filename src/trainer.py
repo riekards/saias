@@ -2,8 +2,8 @@
 
 import yaml
 import torch
-from memory import Memory
-from ppo_model import PPOModel, prepare_dataset, ppo_update
+from .memory import Memory
+from .ppo_model import PPOModel, prepare_dataset, ppo_update
 
 class Trainer:
     """Trainer that performs PPO fine-tuning on the collected memory."""
