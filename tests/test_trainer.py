@@ -15,4 +15,8 @@ def test_trainer_fine_tune(capsys):
     t.memory.add({"role": "user", "text": "hi"})
     t.fine_tune()
     captured = capsys.readouterr()
-    assert "Trainer stub" in captured.out or "No memory" in captured.out
+    assert (
+        "PPO training" in captured.out
+        or "No memory" in captured.out
+        or "No dialogue pairs" in captured.out
+    )

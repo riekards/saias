@@ -8,7 +8,7 @@ This project is a starting scaffold for a **local**, self-evolving, self-learnin
 4. **src/** – core modules:
    - `agent.py` – loads the Ollama model, handles user queries.
    - `memory.py` – a simple replay-buffer/memory store.
-   - `trainer.py` – routines to fine-tune the model locally.
+   - `trainer.py` – routines to fine-tune the model locally using a simple PPO algorithm.
    - `cli.py` – a command-line interface for interacting with the assistant.
 5. **tests/test_agent.py** – a basic unit test for the Agent class.
 
