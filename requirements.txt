@@ -7,3 +7,8 @@ requests
 watchdog
 apscheduler
 pgsql
+
+gym
+numpy
+stable-baselines3
+typescript
