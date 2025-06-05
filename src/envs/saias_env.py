@@ -1,7 +1,8 @@
 import gymnasium as gym
+from gymnasium import spaces
 import numpy as np
-from agent import Agent
-from trainer import Trainer
+from src.agent import Agent
+from src.trainer import Trainer
 
 class SaiasEnv(gym.Env):
     """Simple Gymnasium environment for controlling the SaiAS agent."""
