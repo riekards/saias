@@ -1,6 +1,7 @@
 # src/scheduler.py
 
 import yaml
+import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from .trainer import Trainer
 
@@ -21,8 +22,8 @@ def periodic_fine_tune(config_path: str = "configs/default.yaml"):
 
     print(f"[Scheduler] Scheduled fine-tune every {interval_minutes} minutes.")
     try:
-        # Keep the scheduler thread alive indefinitely
-        scheduler._event.wait()
+        while True:
+            time.sleep(1)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
         print("[Scheduler] Shutdown complete.")

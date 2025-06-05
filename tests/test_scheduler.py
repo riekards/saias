@@ -6,15 +6,10 @@ class DummyTrainer:
     def fine_tune(self):
         self.fine_tune_called = True
 
-class DummyEvent:
-    def wait(self):
-        raise KeyboardInterrupt
-
 class DummyScheduler:
     def __init__(self):
         self.jobs = []
         self.started = False
-        self._event = DummyEvent()
     def add_job(self, func, trigger, minutes=None, next_run_time=None):
         self.jobs.append((func, trigger, minutes, next_run_time))
     def start(self):
@@ -32,6 +27,11 @@ def test_periodic_fine_tune(monkeypatch):
 
     monkeypatch.setattr(sched_module, "Trainer", lambda config_path="": trainer)
     monkeypatch.setattr(sched_module, "BackgroundScheduler", scheduler_factory)
+
+    def raise_interrupt(_):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(sched_module.time, "sleep", raise_interrupt)
 
     sched_module.periodic_fine_tune(config_path="configs/default.yaml")
 
