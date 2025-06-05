@@ -30,6 +30,9 @@ Additional modules:
    pip install -r requirements.txt
    pip install -e .        # install the src package
    ```
+   If you skip the editable install step, Python will not find the internal
+   modules and running scripts such as `train_ppo.py` can raise
+   `ModuleNotFoundError` errors.
 4. Launch the CLI:
    ```bash
    python src/cli.py [--train | --self-improve]
