@@ -1,11 +1,12 @@
-import gym
-from gym import spaces
+import gymnasium as gym
 import numpy as np
 from agent import Agent
 from trainer import Trainer
 
 class SaiasEnv(gym.Env):
-    def __init__(self, config_path="configs/default.yaml"):
+    """Simple Gymnasium environment for controlling the SaiAS agent."""
+
+    def __init__(self, config_path: str = "configs/default.yaml", max_steps: int = 100, state_size: int = 128):
         super().__init__()
         self.agent = Agent(config_path=config_path)
         self.trainer = Trainer(config_path=config_path)
@@ -45,8 +46,10 @@ class SaiasEnv(gym.Env):
             reward = -0.1
 
         self.current_step += 1
-        done = self.current_step >= self.max_steps
+        terminated = self.current_step >= self.max_steps
+        truncated = False
         info = {}
+        return self.state, reward, terminated, truncated, info
 
         # New Gym/Stable-Baselines3 API requires (obs, reward, terminated, truncated, info)
         terminated = done
