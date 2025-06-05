@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 from ..agent import Agent
@@ -6,7 +6,7 @@ from ..trainer import Trainer
 
 
 class SaiasEnv(gym.Env):
-    """Simple gym environment for controlling the SaiAS agent."""
+    """Simple Gymnasium environment for controlling the SaiAS agent."""
 
     def __init__(self, config_path: str = "configs/default.yaml", max_steps: int = 100, state_size: int = 128):
         super().__init__()
@@ -54,9 +54,10 @@ class SaiasEnv(gym.Env):
 
         self.state = self._get_state()
         self.current_step += 1
-        done = self.current_step >= self.max_steps
+        terminated = self.current_step >= self.max_steps
+        truncated = False
         info = {}
-        return self.state, reward, done, info
+        return self.state, reward, terminated, truncated, info
 
     def render(self):
         print(f"Step: {self.current_step}, State[0]: {self.state[0]:.3f}")

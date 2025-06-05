@@ -6,5 +6,5 @@ pytest
 requests
 watchdog
 apscheduler
-gym
+gymnasium
 stable-baselines3
