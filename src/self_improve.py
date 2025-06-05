@@ -1,5 +1,4 @@
 import time
-import threading
 import yaml
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
