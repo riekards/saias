@@ -38,20 +38,23 @@ def test_saias_env_reset_and_step(monkeypatch):
     assert info == {}
 
     # first action: no-op
-    state, reward, done, _ = env.step(0)
+    state, reward, done, truncated, _ = env.step(0)
     assert state.shape == (4,)
     assert reward == 0.0
     assert done is False
+    assert truncated is False
 
     # second action: fine_tune
-    state, reward, done, _ = env.step(1)
+    state, reward, done, truncated, _ = env.step(1)
     assert env.trainer.fine_tune_called
     assert reward == 1.0
     assert done is False
+    assert truncated is False
 
     # third action: respond
-    state, reward, done, _ = env.step(2)
+    state, reward, done, truncated, _ = env.step(2)
     assert env.agent.respond_called
     assert reward == -0.1
     assert done is True
+    assert truncated is False
 

@@ -1,5 +1,5 @@
 import os
-import gym
+import gymnasium as gym
 
 import train_ppo
 
@@ -14,7 +14,7 @@ class DummyEnv(gym.Env):
         return [0.0], {}
 
     def step(self, action):
-        return [0.0], 0.0, True, {}
+        return [0.0], 0.0, True, False, {}
 
 
 class DummyModel:
