@@ -1,6 +1,12 @@
 # Use a lightweight Python base
 FROM python:3.10-slim
 
+
+# Install Git (and any other OS packages)
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
+
 # Set working directory
 WORKDIR /app
 

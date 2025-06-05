@@ -1,6 +1,6 @@
 # ===== General settings =====
 model:
-  name: "ollama-model-local"
+  name: "mistral"
   device: "auto"
 
 # ===== Memory / Replay Buffer =====
