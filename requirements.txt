@@ -4,3 +4,6 @@ numpy
 torch
 pytest
 requests
+watchdog
+apscheduler
+pgsql
