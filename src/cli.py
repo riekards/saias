@@ -1,7 +1,8 @@
+# src/cli.py
+
 import argparse
 from agent import Agent
 from trainer import Trainer
-
 
 def main():
     parser = argparse.ArgumentParser(description="Local AI Assistant CLI")
@@ -29,7 +30,6 @@ def main():
             break
         response = agent.respond(user_input)
         print("AI:", response)
-
 
 if __name__ == "__main__":
     main()

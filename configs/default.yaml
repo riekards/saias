@@ -1,6 +1,6 @@
 # ===== General settings =====
 model:
-  name: "mistral"
+  name: "mistral:latest"
   device: "auto"
 
 # ===== Memory / Replay Buffer =====

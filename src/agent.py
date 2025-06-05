@@ -1,23 +1,29 @@
+# src/agent.py
+
 import yaml
-from ollama import generate
+import requests
 from memory import Memory
 
 class Agent:
     """
-    Loads a local Ollama model, stores conversations in a simple JSON memory buffer,
-    and provides a .respond(prompt) → str interface.
+    Connects to Ollama’s local server on port 11435 (/api/generate),
+    storing conversation history in a JSON memory buffer,
+    and exposing a .respond(prompt) → str interface.
     """
 
     def __init__(self, config_path: str = "configs/default.yaml"):
         # 1) Load YAML config
-        with open(config_path, "r") as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
 
-        # 2) Read model name + device (device is unused here but kept for future GPU support)
+        # 2) Read model settings (e.g., "mistral:latest")
         self.model_name = cfg["model"]["name"]
         self.device = cfg["model"]["device"]
 
-        # 3) Initialize memory buffer
+        # 3) Point at Ollama’s /api/generate endpoint on port 11435
+        self.ollama_url = "http://localhost:11435/api/generate"
+
+        # 4) Initialize memory buffer
         mem_cfg = cfg["memory"]
         self.memory = Memory(
             max_size=mem_cfg["max_size"],
@@ -26,40 +32,47 @@ class Agent:
 
     def respond(self, user_input: str) -> str:
         """
-        - Append the user prompt to memory.
-        - Call ollama.generate(...) to get a completion.
-        - Append the assistant’s reply to memory.
-        - Return the text response.
+        - Save the user’s prompt in memory.
+        - POST to Ollama’s /api/generate endpoint with stream=false.
+        - Save the assistant’s reply in memory.
+        - Return the generated text.
         """
-
-        # Store the user prompt
+        # 1) Store the user’s query
         self.memory.add({"role": "user", "text": user_input})
 
-        # Call Ollama’s generate(...) endpoint.
-        #   - `model=` must match the name you pulled with `ollama pull <model>`
-        #   - By default, ollama.generate(...) hits http://localhost:11434/api/generate
-        result = generate(
-            model=self.model_name,
-            prompt=user_input
-        )
+        # 2) Build the JSON payload. Setting "stream": false forces Ollama to
+        #    return a single JSON object rather than NDJSON chunks.
+        payload = {
+            "model": self.model_name,
+            "prompt": user_input,
+            "stream": False
+        }
 
-        # Extract the plain-text response
-        # Note: result is a dict that looks like: { "response": "..." }
-        response_text = result.get("response", "").strip()
+        # 3) Send the HTTP POST
+        resp = requests.post(self.ollama_url, json=payload)
+        if resp.status_code != 200:
+            raise RuntimeError(f"Ollama API returned {resp.status_code}: {resp.text}")
 
-        # Store the assistant reply
+        # 4) Parse the JSON response. Ollama will return something like:
+        #    {
+        #      "model": "mistral:latest",
+        #      "created_at": "2025-06-05T07:29:08.5243882Z",
+        #      "response": "Hi there! How can I help?",
+        #      "usage": { … }
+        #    }
+        data = resp.json()
+        response_text = data.get("response", "").strip()
+
+        # 5) Store the assistant’s reply
         self.memory.add({"role": "assistant", "text": response_text})
         return response_text
 
     def save_memory(self):
-        """
-        Dump the entire buffer (list of {role,text} entries) to a timestamped JSON file.
-        """
+        """Dump the conversation buffer to a timestamped JSON file."""
         self.memory.save()
 
 
 if __name__ == "__main__":
-    # Quick sanity check: does Ollama load and reply?
+    # Quick sanity check: make sure the /api/generate endpoint replies
     agent = Agent()
-    reply = agent.respond("Hello, how are you?")
-    print("AI replied:", reply)
+    print("AI replied:", agent.respond("Hello, how are you?"))

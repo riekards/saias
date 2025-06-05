@@ -1,38 +1,31 @@
+# src/trainer.py
+
 import yaml
-from ollama import Ollama, OllamaTrainer
 from memory import Memory
 
 class Trainer:
+    """
+    Stub Trainer: Ollama’s Python client doesn’t currently include a training API.
+    """
+
     def __init__(self, config_path: str = "configs/default.yaml"):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)
-        model_name = cfg["model"]["name"]
-        self.trainer = OllamaTrainer(model_name)
         self.memory = Memory(
             max_size=cfg["memory"]["max_size"],
-            storage_path=cfg["memory"]["storage_path"],
+            storage_path=cfg["memory"]["storage_path"]
         )
-        train_cfg = cfg["trainer"]
-        self.batch_size = train_cfg["batch_size"]
-        self.learning_rate = train_cfg["learning_rate"]
-        self.num_epochs = train_cfg["num_epochs"]
+        train_cfg = cfg.get("trainer", {})
+        self.batch_size = train_cfg.get("batch_size", 32)
+        self.learning_rate = train_cfg.get("learning_rate", 1e-4)
+        self.num_epochs = train_cfg.get("num_epochs", 5)
 
     def fine_tune(self):
         """
-        Example: collect memory, train, and save updated model.
+        Placeholder: prints a message if there’s data, or “No memory” otherwise.
         """
         data = self.memory.buffer
         if not data:
             print("No memory to train on.")
             return
-        inputs = [entry["text"] for entry in data if entry["role"] == "user"]
-        targets = [entry["text"] for entry in data if entry["role"] == "assistant"]
-        self.trainer.train(
-            inputs=inputs,
-            targets=targets,
-            batch_size=self.batch_size,
-            learning_rate=self.learning_rate,
-            epochs=self.num_epochs,
-        )
-        self.trainer.save(f"{model_name}_fine_tuned.pt")
-
+        print(f"Trainer stub: received {len(data)} entries, but no OllamaTrainer available.")
