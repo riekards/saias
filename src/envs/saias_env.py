@@ -41,6 +41,9 @@ class SaiasEnv(gym.Env):
 
         self.agent = Agent(config_path=config_path)
         self.trainer = Trainer(config_path=config_path)
+        # share the same memory buffer between agent and trainer so that
+        # dialogue collected by the agent is available for fine‑tuning
+        self.trainer.memory = self.agent.memory
 
         self.state_size = state_size
         self.observation_space = spaces.Box(
@@ -64,12 +67,19 @@ class SaiasEnv(gym.Env):
         reward = 0.0
 
         if action == 1:
-            # fine-tune the underlying model
+            # fine-tune the underlying model. Make sure at least one dialogue
+            # pair exists in memory so the trainer has something to learn from.
+            if len(self.trainer.memory.buffer) < 2:
+                _ = self.agent.respond("hello?")
             self.trainer.fine_tune()
             reward = 1.0
         elif action == 2:
-            # generate a dummy response
-            _ = self.agent.respond("hello?")
+            # generate a dummy response and store the pair so that future
+            # fine‑tunes have data available
+            resp = self.agent.respond("hello?")
+            if self.trainer.memory is not self.agent.memory:
+                self.trainer.memory.add({"role": "user", "text": "hello?"})
+                self.trainer.memory.add({"role": "assistant", "text": resp})
             reward = -0.1
 
         # observation is always a zero vector for this dummy env
