@@ -1,62 +1,85 @@
+"""Gym environment wrapper around the SaiAS agent.
+
+This minimal env exposes three discrete actions:
+
+```
+0 -> no-op
+1 -> call Trainer.fine_tune()
+2 -> call Agent.respond("hello?")
+```
+
+Observations are simple fixed-length vectors of zeros.  The environment is not
+meant to model any real state but simply exercises the agent and trainer APIs so
+that reinforcement-learning scaffolding (e.g. Stable-Baselines3) can interact
+with them in the examples and tests.
+"""
+
+from __future__ import annotations
+
+from typing import Optional, Tuple
+
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
+
 from src.agent import Agent
 from src.trainer import Trainer
 
-class SaiasEnv(gym.Env):
-    """Simple Gymnasium environment for controlling the SaiAS agent."""
 
-    def __init__(self, config_path: str = "configs/default.yaml", max_steps: int = 100, state_size: int = 128):
+class SaiasEnv(gym.Env):
+    """Tiny environment driving :class:`Agent` and :class:`Trainer`."""
+
+    metadata = {"render.modes": ["human"]}
+
+    def __init__(
+        self,
+        config_path: str = "configs/default.yaml",
+        max_steps: int = 100,
+        state_size: int = 128,
+    ) -> None:
         super().__init__()
+
         self.agent = Agent(config_path=config_path)
         self.trainer = Trainer(config_path=config_path)
 
-        # Observation is a fixed-length float vector (e.g. 128 dims)
+        self.state_size = state_size
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(128,), dtype=np.float32
+            low=-np.inf, high=np.inf, shape=(state_size,), dtype=np.float32
         )
-
-        # Actions: 0=no-op, 1=fine-tune, 2=generate new memory
         self.action_space = spaces.Discrete(3)
 
+        self.max_steps = max_steps
         self.current_step = 0
-        self.max_steps = 100  # or read from config
+        self.state = np.zeros(self.state_size, dtype=np.float32)
 
-    def reset(self):
+    def reset(
+        self, *, seed: Optional[int] = None, options: Optional[dict] = None
+    ) -> Tuple[np.ndarray, dict]:
+        super().reset(seed=seed)
         self.current_step = 0
-        return np.zeros(self.observation_space.shape, dtype=np.float32)
+        self.state = np.zeros(self.state_size, dtype=np.float32)
+        return self.state, {}
 
-    def step(self, action):
+    def step(self, action: int):
         reward = 0.0
 
-        if action == 0:
-            # no-op: return same observation
-            obs = np.zeros(self.observation_space.shape, dtype=np.float32)
-
-        elif action == 1:
-            # fine-tune
+        if action == 1:
+            # fine-tune the underlying model
             self.trainer.fine_tune()
-            obs = np.zeros(self.observation_space.shape, dtype=np.float32)
-            reward = +1.0
-
+            reward = 1.0
         elif action == 2:
-            # generate new memory
+            # generate a dummy response
             _ = self.agent.respond("hello?")
-            obs = np.zeros(self.observation_space.shape, dtype=np.float32)
             reward = -0.1
+
+        # observation is always a zero vector for this dummy env
+        self.state = np.zeros(self.state_size, dtype=np.float32)
 
         self.current_step += 1
         terminated = self.current_step >= self.max_steps
         truncated = False
-        info = {}
-        return self.state, reward, terminated, truncated, info
+        return self.state, reward, terminated, truncated, {}
 
-        # New Gym/Stable-Baselines3 API requires (obs, reward, terminated, truncated, info)
-        terminated = done
-        truncated = False
-
-        return obs, reward, terminated, truncated, info
-
-    def render(self, mode="human"):
+    def render(self, mode: str = "human") -> None:  # pragma: no cover - simple I/O
         print(f"[SaiasEnv] step={self.current_step}")
+
