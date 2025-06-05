@@ -21,7 +21,7 @@ class Agent:
         self.device = cfg["model"]["device"]
 
         # 3) Point at Ollama’s /api/generate endpoint on port 11435
-        self.ollama_url = "http://localhost:11435/api/generate"
+        self.ollama_url = "http://localhost:11434/api/generate"
 
         # 4) Initialize memory buffer
         mem_cfg = cfg["memory"]
