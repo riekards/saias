@@ -1,0 +1,5 @@
+ollama
+pyyaml
+numpy
+torch
+pytest
