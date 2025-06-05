@@ -8,10 +8,12 @@ This minimal env exposes three discrete actions:
 2 -> call Agent.respond("hello?")
 ```
 
-Observations are simple fixed-length vectors of zeros.  The environment is not
-meant to model any real state but simply exercises the agent and trainer APIs so
-that reinforcement-learning scaffolding (e.g. Stable-Baselines3) can interact
-with them in the examples and tests.
+Observations encode a tiny bit of environment state: the current memory size
+and the normalized step count (``current_step / max_steps``). The rest of the
+vector is padded with zeros. This environment is intentionally simple and only
+exists so that reinforcement-learning scaffolding (e.g. Stable-Baselines3) can
+interact with the :class:`Agent` and :class:`Trainer` APIs in the examples and
+tests.
 """
 
 from __future__ import annotations
@@ -55,12 +57,19 @@ class SaiasEnv(gym.Env):
         self.current_step = 0
         self.state = np.zeros(self.state_size, dtype=np.float32)
 
+    def _get_obs(self) -> np.ndarray:
+        """Return the current observation vector."""
+        obs = np.zeros(self.state_size, dtype=np.float32)
+        obs[0] = len(self.trainer.memory.buffer)
+        obs[1] = self.current_step / self.max_steps
+        return obs
+
     def reset(
         self, *, seed: Optional[int] = None, options: Optional[dict] = None
     ) -> Tuple[np.ndarray, dict]:
         super().reset(seed=seed)
         self.current_step = 0
-        self.state = np.zeros(self.state_size, dtype=np.float32)
+        self.state = self._get_obs()
         return self.state, {}
 
     def step(self, action: int):
@@ -82,10 +91,8 @@ class SaiasEnv(gym.Env):
                 self.trainer.memory.add({"role": "assistant", "text": resp})
             reward = -0.1
 
-        # observation is always a zero vector for this dummy env
-        self.state = np.zeros(self.state_size, dtype=np.float32)
-
         self.current_step += 1
+        self.state = self._get_obs()
         terminated = self.current_step >= self.max_steps
         truncated = False
         return self.state, reward, terminated, truncated, {}
