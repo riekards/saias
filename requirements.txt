@@ -1,14 +1,10 @@
 ollama
 pyyaml
 numpy
-torch
+torch>=2.0
 pytest
 requests
 watchdog
 apscheduler
-pgsql
-
 gym
-numpy
 stable-baselines3
-typescript
