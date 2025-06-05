@@ -47,9 +47,13 @@ def test_saias_env_reset_and_step(monkeypatch):
     # second action: fine_tune
     state, reward, done, truncated, _ = env.step(1)
     assert env.trainer.fine_tune_called
+    assert env.agent.respond_called
     assert reward == 1.0
     assert done is False
     assert truncated is False
+
+    # reset flag to verify that action 2 triggers another respond call
+    env.agent.respond_called = False
 
     # third action: respond
     state, reward, done, truncated, _ = env.step(2)
