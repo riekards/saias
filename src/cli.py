@@ -21,9 +21,15 @@ def main():
     args = parser.parse_args()
 
     if args.self_improve:
-        # Start self-improvement watcher (blocking)
-        print("Starting self-improvement watcher...")
-        start_self_improvement()
+        print("Starting self-improvement (watcher + periodic)...")
+        # Launch file-watcher in a new thread
+        watcher_thread = threading.Thread(target=start_self_improvement)
+        watcher_thread.daemon = True
+        watcher_thread.start()
+
+        # Launch periodic scheduler in the main thread
+        from scheduler import periodic_fine_tune
+        periodic_fine_tune()
         return
 
     agent = Agent()
