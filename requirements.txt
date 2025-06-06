@@ -8,3 +8,7 @@ watchdog
 apscheduler
 gymnasium
 stable-baselines3
+gym
+gitpython
+astor
+pgsql
